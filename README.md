@@ -1,5 +1,8 @@
 # WhatsAnalyzer
 
+**Note:** WhatsAnalyzer currently only parses exports with the following timestamp format: [d/mm/yy HH:MM:SS] (no am/pm etc).
+
+
 WhatsAnalyzer is a Node application with a simple idea:
 
 – takes in the supplied WhatsApp export (the text file you get from exporting a chat) and analyzes it
