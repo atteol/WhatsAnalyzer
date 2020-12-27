@@ -1,6 +1,6 @@
 # WhatsAnalyzer
 
-**Note:** WhatsAnalyzer currently only parses exports with the following timestamp format: [d/mm/yy HH:MM:SS] (no am/pm etc).
+**Note:** WhatsAnalyzer currently only parses exports with the following timestamp format: [d/m/yy HH:MM:SS] (no am/pm, etc).
 
 
 WhatsAnalyzer is a Node application with a simple idea:
