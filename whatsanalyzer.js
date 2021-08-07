@@ -1,6 +1,6 @@
-const fs = require("fs");
+import fs from "fs";
 
-const C = require("./color");
+import C from "./color.js";
 
 
 const MESSAGE_TYPE_TEXT     = 0;
@@ -51,6 +51,29 @@ function parseMoment(tstr) {
         "minute": parseInt(_M),
         "second": parseInt(_s),
     }
+}
+
+function formatDay(date) {
+    let year = String(date.getFullYear()).padStart(4, "0"),
+        month = null,
+        day = String(date.getDate()).padStart(2, "0");
+
+    switch (date.getMonth()) {
+        case 0: month = "Jan"; break;
+        case 1: month = "Feb"; break;
+        case 2: month = "Mar"; break;
+        case 3: month = "Apr"; break;
+        case 4: month = "May"; break;
+        case 5: month = "Jun"; break;
+        case 6: month = "Jul"; break;
+        case 7: month = "Aug"; break;
+        case 8: month = "Sep"; break;
+        case 9: month = "Oct"; break;
+        case 10: month = "Nov"; break;
+        case 11: month = "Dec"; break;
+    }
+
+    return `${day} ${month} ${year}`;
 }
 
 function parseParticipants(msgs) {
@@ -225,6 +248,28 @@ ${C.fgCyan}${avg[u].toFixed(3)}${C.reset}`);
     return res.join("\n");
 }
 
+function getActiveDay(msg) {
+    let counts = {};
+    let mKeys = Object.keys(msg);
+    let lastProg = null;
+    for (let mKeyIndex = 0; mKeyIndex < mKeys.length; mKeyIndex++) {
+        let nl = C.fgCyan + "wait" + C.reset + " Analyzing words... " + Math.round(((mKeyIndex + 1) / mKeys.length) * 100) + "%";
+        if (lastProg != nl) {
+            lastProg = nl;
+            editLastLine(nl);
+        }
+        let k = mKeys[mKeyIndex],
+            df = formatDay(msg[k].ts);
+
+        if (!Object.keys(counts).includes(df)) counts[df] = 0;
+        counts[df]++;
+    }
+
+    let days = Object.keys(counts);
+    days.sort((a, b) => counts[b] - counts[a]);
+    return [days[0], counts[days[0]]];
+}
+
 void function main() {
     var argv = process.argv;
 
@@ -234,7 +279,7 @@ void function main() {
     }
 
     let cpath = argv[2];
-    console.log(`${C.fgCyan}wait${C.reset} Accessing file '${cpath}'...`);
+    process.stdout.write(`Accessing file '${cpath}'...`);
     fs.access(cpath, fs.constants.R_OK, (e) => {
         if (e) {
             console.log(`${C.fgRed}error${C.reset} Cannot access file '${argv[2]}'`);
@@ -243,11 +288,11 @@ void function main() {
             console.log(`${C.fgRed}error${C.reset} '${argv[2]}' is not a file`);
             return process.exit(0);
         } else {
-            console.log(`${C.fgGreen}ok${C.reset} Done\n`);
 
             let content = fs.readFileSync(cpath, "utf8");
-    
-            process.stdout.write(`${C.fgCyan}wait${C.reset} Parsing export... 0%`);
+            
+            process.stdout.write("\n");
+            process.stdout.write(`Parsing export... 0%`);
             let lines = content.match(/[^\r\n]+/g);
     
             let failed = null,
@@ -341,17 +386,21 @@ void function main() {
                 console.log(`\n${C.fgRed}error${C.reset} File is not a valid WhatsApp export file (line ${failed} is invalid)`);
                 return process.exit(0);
             }
-            console.log(`\n${C.fgGreen}ok${C.reset} Done\n`);
 
-            console.log(`${C.fgCyan}wait${C.reset} Analyzing users...`);
+            process.stdout.write("\n");
+            process.stdout.write(`Analyzing users...`);
             let finalAnalytics = [];
             let parts = parseParticipants(MESSAGES);
             finalAnalytics.push(`${C.fgGrey}MESSAGES${C.reset}\n\n${buildMessageTable(parts, Object.keys(MESSAGES).length)}`);
-            console.log(`${C.fgGreen}ok${C.reset} Done\n`);
 
-            process.stdout.write(`${C.fgCyan}wait${C.reset} Analyzing words... 0%`);
+            process.stdout.write("\n");
+            process.stdout.write(`Analyzing words... 0%`);
             finalAnalytics.push(`\n\n${C.fgGrey}WORDS${C.reset}\n\n${buildWordTable(parts, MESSAGES)}`);
-            console.log(`\n${C.fgGreen}ok${C.reset} Done\n`);
+
+            process.stdout.write("\n");
+            process.stdout.write(`Analyzing activity... 0%`);
+            let ad = getActiveDay(MESSAGES);
+            finalAnalytics.push(`\n\n${C.fgGrey}MOST ACTIVE DAY${C.reset}\n\n${C.fgCyan}${ad[0]}${C.reset} with ${C.fgGreen}${ad[1].toLocaleString("en")}${C.reset} message${ad[1] != 1 ? "s" : ""}`);
 
             console.log("\n\n" + finalAnalytics.join("\n"));
         }
