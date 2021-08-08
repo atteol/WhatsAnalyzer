@@ -253,7 +253,7 @@ function getActiveDay(msg) {
     let mKeys = Object.keys(msg);
     let lastProg = null;
     for (let mKeyIndex = 0; mKeyIndex < mKeys.length; mKeyIndex++) {
-        let nl = C.fgCyan + "wait" + C.reset + " Analyzing words... " + Math.round(((mKeyIndex + 1) / mKeys.length) * 100) + "%";
+        let nl = C.fgCyan + "wait" + C.reset + " Analyzing activity... " + Math.round(((mKeyIndex + 1) / mKeys.length) * 100) + "%";
         if (lastProg != nl) {
             lastProg = nl;
             editLastLine(nl);
