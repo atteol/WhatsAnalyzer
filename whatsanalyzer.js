@@ -29,27 +29,14 @@ function editLastLine(ntx) {
 }
 
 function parseMoment(tstr) {
-    let _y, _m, _d, _h, _M, _s;
-
-    _d = tstr.substring(0, 2);
-    if (_d.endsWith("/")) _d = tstr.substring(0, 1);
-
-    _m = tstr.substring(1 + _d.length, (2 + _d.length) + 1);
-    if (_m.endsWith("/")) _m = tstr.substring(1 + _d.length, (2 + _d.length));
-
-    _y = tstr.substring((2 + _d.length) + _m.length, (2 + _m.length) + (_d.length + _m.length)).padStart(4, "20");
-
-    _s = tstr.substring(tstr.length - 2, tstr.length);
-    _M = tstr.substring(tstr.length - 5, tstr.length - 3);
-    _h = tstr.substring(tstr.length - 8, tstr.length - 6);
-
+    let reg = tstr.match(/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{1,2}), ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/);
     return {
-        "year": parseInt(_y),
-        "month": parseInt(_m),
-        "day": parseInt(_d),
-        "hour": parseInt(_h),
-        "minute": parseInt(_M),
-        "second": parseInt(_s),
+        "year": parseInt(reg[3].padStart(4, "20")),
+        "month": parseInt(reg[2]),
+        "day": parseInt(reg[1]),
+        "hour": parseInt(reg[4]),
+        "minute": parseInt(reg[5]),
+        "second": parseInt(reg[6]),
     }
 }
 
